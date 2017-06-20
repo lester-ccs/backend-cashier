@@ -12,13 +12,13 @@ class TwoFactorAuthenticationTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
                 ->json('POST', '/settings/two-factor-auth', [
                     'country_code' => '1',
                     'phone' => '4792266733',
                 ]);
 
-        $this->getStatus(200);
+        $response->assertStatus(200);
 
         $user = $user->fresh();
 
@@ -30,13 +30,13 @@ class TwoFactorAuthenticationTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
                 ->json('POST', '/settings/two-factor-auth', [
                     'country_code' => '',
                     'phone' => '4792266733',
                 ]);
 
-        $this->getStatus(422);
+        $response->assertStatus(422);
     }
 
 
@@ -44,13 +44,13 @@ class TwoFactorAuthenticationTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
                 ->json('POST', '/settings/two-factor-auth', [
                     'country_code' => '1',
                     'phone' => '',
                 ]);
 
-        $this->getStatus(422);
+        $response->assertStatus(422);
     }
 
 
@@ -58,23 +58,24 @@ class TwoFactorAuthenticationTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
                 ->json('POST', '/settings/two-factor-auth', [
                     'country_code' => '1',
                     'phone' => '4792266733',
                 ]);
 
-        $this->getStatus(200);
+        $response->assertStatus(200);
 
         $user = $user->fresh();
+        
         $this->assertTrue(! is_null($user->authy_id));
 
         $this->actingAs($user)
-                ->json('DELETE', '/settings/two-factor-auth', []);
-
-        $this->getStatus(200);
+            ->json('DELETE', '/settings/two-factor-auth', [])
+            ->assertStatus(200);;
 
         $user = $user->fresh();
+
         $this->assertTrue(is_null($user->authy_id));
     }
 }
